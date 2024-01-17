@@ -1,0 +1,193 @@
+name: Russfest
+description: Central Smart Contract to handle Russfest interactions
+events: 
+  test:
+structs: 
+  Musician:
+    name: String # Name of the musician
+    shop: String # Name of associated Shop
+  Timeslot:
+    musician: String # name of the musician
+    start: Uint64 # starttime of Timeslot
+    end: Uint64 # enddtime of Timeslot
+  Shop:
+    shopName: String # Name of the Shop
+    musicianName: String # Name of the musician
+    fee: Uint64 # Fee the Shop wants to pay
+    shopOwner: AgentID # Address of ShopOwner
+    isRegistered: String # Sets if Shop is registered or still has open request
+    shopHname: Hname # hName of Shop
+  Product:
+    productType: String # type of Product e.g. Tshirt
+    Musician: String # Associated Musician
+    shopName: String # shopName
+    Price: Uint64 # Price of product
+    Stock: Uint64 # Available Stock
+  ProductTemplate:
+    productType: String # type of Product e.g. Tshirt
+    Musician: String # Associated Musician
+    Price: Uint64 # Price of product
+    shopName: String # name of the Shop
+  StatisticProduct:
+    id: Uint64 # id of product
+    productType: String # type of Product e.g. Tshirt
+    Musician: String # Associated Musician
+    Price: Uint64 # Price of product
+    timestamp: Uint64 # Timestampt since last production step
+    productionStep: Uint64 # Index of production plant
+    shopName: String # name of the Shop
+typedefs: {}
+state:
+  owner: AgentID # current owner of this smart contract
+  Shops: map[String]Shop # map of all Shops
+  products: Product[] # array of all products
+  shopnames: String[] # array of all Shopnames
+  timeslots: Timeslot[] # ordered array of timeslots
+  musicians: Musician[] # array of all musicians
+  earnedMoney: Uint64 # amount of earnedMoney
+  errorMessages: map[String]String # maps an request id to an error message 
+funcs:
+  init:
+    params:
+      owner: AgentID? # optional owner of this smart contract
+  setOwner:
+    params:
+      newOwner: AgentID # new owner of this smart contract
+  requestShopLicence:
+    params:
+      name: String # Name of the Shop
+      fee: Uint64 # fee to pay
+      musicianName: String # Name of the Musician
+      shopHname: Hname # hname of Shop
+  acceptShop:
+    access: owner # only owner can accept Shop
+    params:
+      shopName: String # Name of the Shop
+  denyShop:
+    access: owner # only owner can accept Shop
+    params:
+      shopName: String # Name of the Shop
+  cancelShopRequest:
+    params:
+        name: String # Name of the Shop
+  updateDeniedShopRequest:
+    params:
+      shopName: String # Name of the Shop
+      newfee: Uint64? # fee to pay
+      newHname: Hname? # new Hname of Address
+  addMusician:
+    access: owner # current owner of this smart contract
+    params:
+      name: String # name of musician
+      shop: String? # optional shop for merch
+  buyMerch:
+    params:
+      musician: String # Musician
+      productType: String # type of Product
+      shopName: String # Name of the shop
+  callCreateNewProduct:
+    params:
+      musicianName: String # name of musician
+      price: Uint64 # Price of product
+      productType: String # type of Product e.g. Tshirt
+      shopName: String # name of the Shop
+  callPayStore:
+    params: 
+      shopName: String # name of the shop
+  callPingShop:
+    results:
+      pingSuccessful: Bool # shows if ping was successful
+  callCheckProduct:
+    params:
+      product: ProductTemplate # Product I want to check
+    results:
+      canProduce: Bool # shows if SC can produce Product
+      message: String? # optional error message 
+  callSendProduct:
+  callRecieveProducts:
+    results:
+      product: Product[] # products that are ready to ship to russfest
+views:
+  getOwner:
+    results:
+      owner: AgentID # current owner of this smart contract
+  getAgendID:
+    results:
+      ScAgentId: AgentID # AgentID of SC
+  getTimeslots:
+    results:
+      timeslots: Timeslot[] # all filled timeslots
+  getOpenShopRequest:
+    params:
+      shopOwner: AgentID # agendID of owner
+    results:
+      openShopRequest: Shop[] # all open Shop requests from specified shop owner
+  getAllOpenShopRequests:
+    results:
+      openShopRequest: Shop[] # all open Shop requests
+  getDeniedShopRequests:
+    params:
+      shopOwner: AgentID # ID of shop Owner
+    results:
+      deniedShopRequests: Shop[] # all denied Shop request of Shop owner
+  getAllRegisteredShops:
+    results:
+      shops: Shop[] # all registered shops
+  getRegisteredShopsFromOwner:
+    params:
+      shopOwner: AgentID # agentID from owner
+    results:
+      ownerShops: Shop[] # all registered shops from owner
+  getMusicians:
+    results:
+      musicians: Musician[] # all known Musicians
+  getMusiciansWithoutShop:
+    results:
+      musiciansWithoutShop: Musician[] # all known Musicians without Shop
+  getAllProducts:
+    results:
+      products: Product[] # get all available Products
+  getSpecificProducts:
+    params:
+      shopName: String # Name of Musician
+    results:
+      products: Product[] # get all available Products of specific Musician
+  testView:
+    results:
+      testString: String[] # array of test Strings
+  testViewSingle:
+    results:
+      singeString: String # single String
+  getErrorMessagesView:
+    params:
+      requestID: String # string of requestID
+    results:
+      errorMessage: String
+  getFestivalEarnings:
+    results:
+      festivalEarnings: Uint64 # earnings of festival
+  getShopStatistics:
+    params:
+      shopName: String # name of the shop
+    results: 
+      musician: String # name of the musician
+      earnings: Uint64 # earnings of shop
+      producedProducts: Uint64 # produced Products for this Shop
+      soldProducts: Uint64 # sold porducts for this shop
+      maxProductionsStep: Uint64 # max production step for this shop
+      productionTemplates: ProductTemplate[] # all ProductTemplates that exist for this shop
+      production: StatisticProduct[] # all Products that currently are in production
+      shopName: String # name of the Shop
+  callGetShopStatistics:
+    params:
+      shopName: String # name of the shop
+    results:
+      earnings: Uint64 # earnings of shop
+      producedProducts: Uint64 # produced Products for this Shop
+      soldProducts: Uint64 # sold porducts for this shop
+      maxProductionsStep: Uint64 # max production step for this shop
+      productionTemplates: ProductTemplate[] # all ProductTemplates that exist for this shop
+      production: StatisticProduct[] # all Products that currently are in production   
+
+
+  

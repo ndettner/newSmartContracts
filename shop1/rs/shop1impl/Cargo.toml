@@ -1,0 +1,17 @@
+[package]
+name = "shop1impl"
+description = "Implementation library for: shop1 description"
+license = ""
+version = "0.0.1"
+authors = [""]
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+shop1 = { path = "../shop1" }
+wasmlib = { git = "https://github.com/iotaledger/wasp", branch = "develop" }
+
+[dev-dependencies]
+wasm-bindgen-test = "0.3.34"

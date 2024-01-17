@@ -1,0 +1,109 @@
+copyright: ""
+name: shop1
+version: 0.0.1
+description: shop1 description
+author: ""
+license: ""
+repository: ""
+events: {}
+structs:
+  Product:
+    productType: String # type of Product e.g. Tshirt
+    Musician: String # Associated Musician
+    shopName: String # shopName
+    Price: Uint64 # Price of product
+    Stock: Uint64 # Available Stock
+  ProductTemplate:
+    productType: String # type of Product e.g. Tshirt
+    Musician: String # Associated Musician
+    Price: Uint64 # Price of product
+    shopName: String # name of the Shop
+  StatisticProduct:
+    id: Uint64 # id of product
+    productType: String # type of Product e.g. Tshirt
+    Musician: String # Associated Musician
+    Price: Uint64 # Price of product
+    timestamp: Uint64 # Timestampt since last production step
+    productionStep: Uint64 # Index of production plant
+    shopName: String # name of the Shop
+typedefs: {}
+state:
+  owner: AgentID # current owner of this smart contract
+  productTemplates: ProductTemplate[] # Product Templates
+  producingProducts: StatisticProduct[] # all Products in Production
+  finishedProducts: Product[] # all finished products which are ready to be deployed
+  shopNames: String[] # array of all Shops
+  earnedMoney: map[String]Uint64 # earned Money for every Shop
+  totalEarnedMoney: Uint64 # sum of total earned Money
+  productID: Uint64 # product ID
+  producedProducts: map[String] Uint64 # amount of products produced per Shop
+  totalProducedProducts: Uint64 # amount of al produced products
+  totalSoldProducts: Uint64 # amount of total sold products
+  soldProducts: map[String] Uint64 # amount of products sold per shop
+  festivalHname: Hname # Hname of Shop
+funcs:
+  init:
+    params:
+      owner: AgentID? # optional owner of this smart contract
+  setOwner:
+    params:
+      owner: AgentID # new owner of this smart contract
+  callCreateNewProduct:
+    params:
+      musicianName: String # name of musician
+      price: Uint64 # Price of product
+      productType: String # type of Product e.g. Tshirt
+      shopName: String # name of the Shop
+  callCheckProduct:
+    params:
+      product: ProductTemplate # Product I want to check
+    results:
+      canProduce: Bool # shows if SC can produce Product
+      message: String? # optional error message 
+  callPayStore:
+    params:
+      shopName: String # name of the shop
+  callPingShop:
+    results:
+      pingSuccessful: Bool # shows if ping was successful
+  startProduction:
+    access: owner # current owner of this smart contract
+  produce:
+    access: self # only SC can produce
+  callSendProduct:
+  callRecieveProducts:
+    results:
+      product: Product[] # products that are ready to ship to russfest
+views:
+  getOwner:
+    results:
+      owner: AgentID # current owner of this smart contract
+  getSoldProducts:
+    results: 
+      soldProductsPerShop: map[String]Uint64 # all sold Products per Shop
+      totalSoldProducts: Uint64 # all sold Products
+  getProducedProducts:
+    results: 
+      producedProductsPerShop: map[String]Uint64 # all produced Products per Shop
+      totalProducedProducts: Uint64 # amount of all produced Products
+  getEarnings:
+    results:
+      earningsPerShop: map[String]Uint64 # earnings per shop
+      totalEarnings: Uint64 # total earnings of shop
+  getProductsInProduction:
+    results:
+      totalProductsInProduction: Uint64 # amount of all products in production
+      productsInProduction: StatisticProduct[] # all products in Production
+  getMaxProductionSteps:
+    results:
+      maxProductionSteps: Uint64 # max production steps
+  callGetShopStatistics:
+    params:
+      shopName: String # name of the shop
+    results:
+      earnings: Uint64 # earnings of shop
+      producedProducts: Uint64 # produced Products for this Shop
+      soldProducts: Uint64 # sold porducts for this shop
+      maxProductionsStep: Uint64 # max production step for this shop
+      productionTemplates: ProductTemplate[] # all ProductTemplates that exist for this shop
+      production: StatisticProduct[] # all Products that currently are in production

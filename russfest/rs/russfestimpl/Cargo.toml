@@ -1,0 +1,17 @@
+[package]
+name = "russfestimpl"
+description = "Implementation library for: Central Smart Contract to handle Russfest interactions"
+license = ""
+version = "0.0.1"
+authors = [""]
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+russfest = { path = "../russfest" }
+wasmlib = { git = "https://github.com/iotaledger/wasp", branch = "develop" }
+
+[dev-dependencies]
+wasm-bindgen-test = "0.3.34"
