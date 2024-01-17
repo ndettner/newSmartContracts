@@ -1,0 +1,10 @@
+{
+  "name": "russfest",
+  "version": "0.0.1",
+  "description": "Interface library for: Central Smart Contract to handle Russfest interactions",
+  "main": "index.ts",
+  "author": "",
+  "license": "Apache-2.0",
+  "dependencies": {
+  }
+}
