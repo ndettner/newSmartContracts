@@ -1,4 +1,5 @@
 russfest/rs/russfest/target/
 russfest/rs/russfestwasm/target/
 
-
+shop1/rs/shop1wasm/target/
+russfest/rs/russfest/target/.rustc_info.json
