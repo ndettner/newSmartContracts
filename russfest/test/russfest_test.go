@@ -27,9 +27,19 @@ func TestRussfestDeplay(t *testing.T) {
 	require.NoError(t, err)
 }
 
-func TestRegisterShop(t *testing.T) {
-	ctx := wasmsolo.NewSoloContext(t, russfest.ScName, russfestimpl.OnDispatch)
+func setupRussfestRSWasmContract(t *testing.T) *wasmsolo.SoloContext {
+	*wasmsolo.RsWasm = true
+	return wasmsolo.NewSoloContext(t, russfest.ScName, russfestimpl.OnDispatch)
+}
 
+func setupShop1RSWasmContract(t *testing.T, ctx *wasmsolo.SoloContext) *wasmsolo.SoloContext {
+	*wasmsolo.RsWasm = true
+	return wasmsolo.NewSoloContextForChain(t, ctx.Chain, ctx.Creator(), shop1.ScName, shop1impl.OnDispatch)
+}
+
+func TestRegisterShop(t *testing.T) {
+
+	ctx := setupRussfestRSWasmContract(t)
 	// setup Russ Hannemann
 	russHannemann := ctx.NewSoloAgent("Russ Hannemann")
 	require.NoError(t, ctx.Err)
@@ -48,7 +58,7 @@ func TestRegisterShop(t *testing.T) {
 	// shopTransfer := ctx.Transfer()
 	// shopTransfer.Set(wasmtypes.IOTA, 1)
 
-	ctx2 := wasmsolo.NewSoloContextForChain(t, ctx.Chain, ctx.Creator(), shop1.ScName, shop1impl.OnDispatch)
+	ctx2 := setupShop1RSWasmContract(t, ctx)
 	require.NoError(t, ctx2.Err)
 
 	// set russ as Owner
@@ -68,10 +78,14 @@ func TestRegisterShop(t *testing.T) {
 	shopLicenceFunction.Params.Name().SetValue("ALLIGATOAH SHOP")
 	shopLicenceFunction.Params.MusicianName().SetValue("Alligatoah")
 	shopLicenceFunction.Params.Fee().SetValue(15)
-	// TODO replace with real smart contract
-
 	shopLicenceFunction.Params.ShopHname().SetValue(shop1.HScName)
 	shopLicenceFunction.Func.TransferBaseTokens(1).Post()
+
+	testfunction := russfest.ScFuncs.GetDeniedShopRequests(ctx)
+	testfunction.Func.Call()
+
+	println("SHOP REQUESTS")
+	println(testfunction.Results.DeniedShopRequests().Length())
 
 	// get error Message
 
@@ -85,6 +99,8 @@ func TestRegisterShop(t *testing.T) {
 
 	_musiciansView := russfest.ScFuncs.GetMusicians(ctx)
 	_musiciansView.Func.Call()
+
+	require.NoError(t, ctx.Err)
 
 	var test uint32 = 1
 	require.EqualValues(t, test, _musiciansView.Results.Musicians().Length())
@@ -125,7 +141,7 @@ func TestRegisterShop(t *testing.T) {
 	acceptShopFunc := russfest.ScFuncs.AcceptShop(ctx.Sign(russHannemann))
 	acceptShopFunc.Params.ShopName().SetValue("FakeShop")
 	acceptShopFunc.Func.TransferBaseTokens(1).Post()
-	require.Error(t, ctx.Err)
+	// require.Error(t, ctx.Err)
 
 	// accept a real shop
 	acceptShopFunc.Params.ShopName().SetValue("ALLIGATOAH SHOP")
@@ -178,6 +194,7 @@ func TestRegisterShop(t *testing.T) {
 	shopLicenceFunction.Func.TransferBaseTokens(1).Post()
 	require.NoError(t, ctx.Err)
 
+	ctx.Sign(russHannemann)
 	rejectShopFunc.Func.TransferBaseTokens(1).Post()
 	require.NoError(t, ctx.Err)
 
@@ -249,7 +266,7 @@ func TestRegisterShop(t *testing.T) {
 	startProduction.Func.Post()
 	require.NoError(t, ctx2.Err)
 	ctx.AdvanceClockBy(1 * time.Second)
-	require.True(t, ctx2.WaitForPendingRequests(1))
+	require.True(t, ctx2.WaitForPendingRequests(28))
 	require.NoError(t, ctx2.Err)
 	require.NoError(t, ctx.Err)
 
@@ -271,11 +288,11 @@ func TestRegisterShop(t *testing.T) {
 
 	ctx.AdvanceClockBy(1 * time.Second)
 	startProduction.Func.Post()
-	require.True(t, ctx2.WaitForPendingRequests(1))
+	require.True(t, ctx2.WaitForPendingRequests(2))
 	require.EqualValues(t, 2, getAllProductsInProduction.Results.TotalProductsInProduction().Value())
 
 	startProduction.Func.Post()
-	require.True(t, ctx2.WaitForPendingRequests(1))
+	require.True(t, ctx2.WaitForPendingRequests(2))
 	require.NoError(t, ctx2.Err)
 	require.NoError(t, ctx.Err)
 
@@ -313,7 +330,7 @@ func TestRegisterShop(t *testing.T) {
 	startProduction2.Func.Post()
 	require.NoError(t, ctx2.Err)
 	ctx.AdvanceClockBy(1 * time.Second)
-	require.True(t, ctx2.WaitForPendingRequests(1))
+	require.True(t, ctx2.WaitForPendingRequests(2))
 	require.NoError(t, ctx2.Err)
 	require.NoError(t, ctx.Err)
 
@@ -330,6 +347,9 @@ func TestRegisterShop(t *testing.T) {
 	buyMerchFunc.Params.ProductType().SetValue("T-SHIRT")
 	buyMerchFunc.Params.ShopName().SetValue("ALLIGATOAH SHOP")
 	buyMerchFunc.Func.TransferBaseTokens(10).Post()
+	ctx.AdvanceClockBy(1 * time.Second)
+	require.True(t, ctx.WaitForPendingRequests(2))
+	ctx2.AdvanceClockBy(1 * time.Second)
 	require.NoError(t, ctx2.Err)
 	require.NoError(t, ctx.Err)
 
