@@ -175,7 +175,7 @@ pub fn func_buy_merch(ctx: &ScFuncContext, f: &BuyMerchContext) {
     func.func
         .transfer_base_tokens(shop_amount)
         .of_contract(s_c_address)
-        .call();
+        .post();
 
     // save earned money
     f.state
@@ -392,12 +392,14 @@ pub fn func_cancel_shop_request(ctx: &ScFuncContext, f: &CancelShopRequestContex
         .get_shop(&shop_name.value())
         .set_value(&shop_to_be_deleted);
 
+    ctx.log("Before Re Enter Shop NAMES");
+
     // re-enter shopNames without canceled shop
     for i in 0..new_shop_name_array.len() {
         let insert_shop_name = new_shop_name_array[i].clone();
         f.state
             .shopnames()
-            .get_string(i as u32)
+            .append_string()
             .set_value(&insert_shop_name);
     }
 
@@ -662,6 +664,10 @@ pub fn view_get_musicians(ctx: &ScViewContext, f: &GetMusiciansContext) {
             .append_musician()
             .set_value(&f.state.musicians().get_musician(i).value());
     }
+
+    let test = "FUCK123";
+
+    log(test);
 }
 
 pub fn view_get_musicians_without_shop(ctx: &ScViewContext, f: &GetMusiciansWithoutShopContext) {
@@ -726,6 +732,9 @@ pub fn view_get_shop_statistics(ctx: &ScViewContext, f: &GetShopStatisticsContex
 
     // set results
     log("RUSSFEST RESULTS");
+
+    let test1 = func.results.earnings().value();
+    ctx.log(test1.to_string().as_str());
 
     // set musicianName
     f.results.musician().set_value(&shop.musician_name);

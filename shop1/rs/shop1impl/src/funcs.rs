@@ -229,8 +229,7 @@ pub fn func_produce(ctx: &ScFuncContext, f: &ProduceContext) {
 
     for i in 0..new_producing_array.len() {
         f.state
-            .producing_products()
-            .get_statistic_product(i as u32)
+            .producing_products().append_statistic_product()
             .set_value(&new_producing_array[i]);
     }
 
